@@ -16,7 +16,13 @@ import {
   ChevronRight,
   Smile,
   Frown,
-  Search
+  Search,
+  Trophy,
+  BarChart3,
+  Target,
+  Compass,
+  DollarSign,
+  Briefcase
 } from 'lucide-react';
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
@@ -167,11 +173,29 @@ interface GameState {
   };
   showWeeklySummary: boolean;
   purchaseCounts: Record<string, number>;
-  finalResult?: {
-    isSuccess: boolean;
-    university?: string;
-    major?: string;
-    endingId: string;
+  endingStats?: {
+    title: string;
+    detail: string;
+    fancyQuote: string;
+    careerStats: {
+      finalGpa: number;
+      totalResumeScore: number;
+      finalEnglish: number;
+      finalSocial: number;
+      finalMoney: number;
+    };
+    applicationStats: {
+      summerCamp: {
+        applied: number;
+        interviews: number;
+        offers: number;
+      };
+      preRec: {
+        applied: number;
+        interviews: number;
+        offers: number;
+      };
+    };
   };
 }
 
@@ -1140,7 +1164,7 @@ export default function App() {
         {
           text: "婉言拒绝，专注自己",
           effect: (s) => ({
-            newStats: { ...s, gpa: s.gpa + 0.02 },
+            newStats: { ...s, mental: s.mental - 5, research: s.research + 5 },
             log: "你争取到了更多的复习时间，但气氛变得有些微妙。"
           })
         }
@@ -1221,8 +1245,8 @@ export default function App() {
         {
           text: "陪对方出去玩一天",
           effect: (s) => ({
-            newStats: { ...s, mental: s.mental + 15, stamina: s.stamina - 10, gpa: s.gpa - 0.02 },
-            log: "感情升温，心情大好。但学习进度落下了一点。"
+            newStats: { ...s, mental: s.mental + 25, stamina: s.stamina - 15 },
+            log: "感情升温，心情大好。这比拿个高分更让你开心。"
           })
         },
         {
@@ -1241,8 +1265,8 @@ export default function App() {
         {
           text: "加倍努力，卷死他们",
           effect: (s) => ({
-            newStats: { ...s, stamina: s.stamina - 20, mental: s.mental - 10, gpa: s.gpa + 0.05 },
-            log: "你开启了狂暴模式，GPA提升，但身心俱疲。"
+            newStats: { ...s, stamina: s.stamina - 30, mental: s.mental - 15, research: s.research + 10 },
+            log: "你开启了狂暴模式，科研背景大幅提升，但身心俱疲。"
           })
         },
         {
@@ -1301,15 +1325,15 @@ export default function App() {
         {
           text: "狂奔去教室",
           effect: (s) => ({
-            newStats: { ...s, stamina: s.stamina - 15, gpa: s.gpa + 0.01 },
+            newStats: { ...s, stamina: s.stamina - 15, mental: s.mental + 5 },
             log: "赶上了点名，顺便复习了下功课。"
           })
         },
         {
           text: "继续睡觉",
           effect: (s) => ({
-            newStats: { ...s, gpa: s.gpa - 0.05, stamina: s.stamina + 10 },
-            log: "旷课被记名，GPA下降。但睡得很香。"
+            newStats: { ...s, mental: s.mental - 10, stamina: s.stamina + 20 },
+            log: "旷课被记名，辅导员在群里点名批评。但睡得很香。"
           })
         }
       ]
@@ -1321,15 +1345,15 @@ export default function App() {
         {
           text: "去参加夏令营面试（风险大）",
           effect: (s) => ({
-            newStats: { ...s, research: s.research + 20, gpa: s.gpa - 0.2 },
-            log: "面试表现优异，拿到了优秀营员！但期末考试挂了，GPA惨跌。"
+            newStats: { ...s, research: s.research + 30, mental: s.mental - 10 },
+            log: "面试表现优异，拿到了优秀营员！但这学期的课程你只能靠自学补回来了。"
           })
         },
         {
           text: "稳妥起见，参加期末考试",
           effect: (s) => ({
-            newStats: { ...s, gpa: s.gpa + 0.1 },
-            log: "你保住了GPA，但错过了这次宝贵的保研机会。"
+            newStats: { ...s, mental: s.mental + 10, research: s.research + 5 },
+            log: "你保住了这学期的成绩，但错过了这次宝贵的保研机会。"
           })
         }
       ]
@@ -1586,8 +1610,8 @@ export default function App() {
         {
           text: "坚守底层，钻研架构",
           effect: (s) => ({
-            newStats: { ...s, research: s.research + 10, gpa: s.gpa + 0.05 },
-            log: "底层技术永远是基石，你的坚持得到了认可。"
+            newStats: { ...s, research: s.research + 20, mental: s.mental + 5 },
+            log: "底层技术永远是基石，你的坚持得到了认可，科研深度大幅增加。"
           })
         }
       ]
@@ -1660,15 +1684,15 @@ export default function App() {
         {
           text: "两手都要抓",
           effect: (s) => ({
-            newStats: { ...s, stamina: s.stamina - 25, mental: s.mental - 20, gpa: s.gpa + 0.05 },
-            log: "太累了，你几乎没有睡眠时间，但绩点确实上去了。"
+            newStats: { ...s, stamina: s.stamina - 35, mental: s.mental - 25, research: s.research + 5, competition: s.competition + 5 },
+            log: "太累了，你几乎没有睡眠时间，但你的履历变得异常丰富。"
           })
         }
       ]
     },
     {
       title: "跨学科项目邀请",
-      description: "一个设计专业的学妹邀请你加入她们的跨学科项目组，开发一个艺术 AI。",
+      description: "一个设计专业的学妹邀请 you 加入她们的跨学科项目组，开发一个艺术 AI。",
       majorRestriction: ["cs", "art"],
       options: [
         {
@@ -1676,6 +1700,304 @@ export default function App() {
           effect: (s) => ({
             newStats: { ...s, research: s.research + 15, mental: s.mental + 10 },
             log: "跨学科的视角让你对专业有了全新的理解，还收获了一段友谊。"
+          })
+        }
+      ]
+    },
+    {
+      title: "开源项目贡献",
+      description: "你发现一个知名开源项目有个明显的 Bug，打算提交一个 PR。",
+      majorRestriction: ["cs"],
+      options: [
+        {
+          text: "仔细分析，提交修复",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 12, mental: s.mental + 5 },
+            log: "你的 PR 被合并了！简历上的开源贡献亮眼了不少。"
+          })
+        },
+        {
+          text: "太复杂了，放弃",
+          effect: (s) => ({
+            newStats: s,
+            log: "你决定还是先专注自己的项目。"
+          })
+        }
+      ]
+    },
+    {
+      title: "社团招新季",
+      description: "作为社团骨干，你需要负责招新宣传工作，这非常占用时间。",
+      options: [
+        {
+          text: "全力投入，锻炼能力",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 15, stamina: s.stamina - 20, competition: s.competition + 5 },
+            log: "招新很成功，你提升了组织能力，但也感到精疲力竭。"
+          })
+        },
+        {
+          text: "划水应付，专注学习",
+          effect: (s) => ({
+            newStats: { ...s, stamina: s.stamina + 5, mental: s.mental - 5 },
+            log: "你保住了体力，但社团同伴对你的评价变差了。"
+          })
+        }
+      ]
+    },
+    {
+      title: "食堂偶遇导师",
+      description: "在食堂排队时，你刚好排在导师后面。",
+      options: [
+        {
+          text: "上前打招呼并聊聊进度",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 8, mental: s.mental + 5 },
+            log: "导师对你的主动和进度非常满意，给了你一些关键建议。"
+          })
+        },
+        {
+          text: "假装没看见，换个窗口",
+          effect: (s) => ({
+            newStats: { ...s, stamina: s.stamina - 5 },
+            log: "你避开了尴尬，但错失了一个非正式交流的机会。"
+          })
+        }
+      ]
+    },
+    {
+      title: "期刊审稿邀请",
+      description: "你之前发表的论文引起了关注，某二区期刊邀请你担任审稿人。",
+      majorRestriction: ["cs", "biology", "ee"],
+      options: [
+        {
+          text: "认真审稿，提升眼界",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 15, stamina: s.stamina - 15 },
+            log: "通过审视别人的工作，你对科研严谨性有了更深的理解。"
+          })
+        }
+      ]
+    },
+    {
+      title: "校内黑客松",
+      description: "学校举办 24 小时黑客松比赛，主题是‘科技改变校园’。",
+      options: [
+        {
+          text: "组队参加，通宵奋战",
+          effect: (s) => ({
+            newStats: { ...s, competition: s.competition + 20, stamina: s.stamina - 35, mental: s.mental + 10 },
+            log: "你们的作品获得了二等奖！虽然累坏了，但成就感满满。"
+          })
+        },
+        {
+          text: "作为观众去看看",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 5 },
+            log: "你看到很多有趣的想法，拓宽了思路。"
+          })
+        }
+      ]
+    },
+    {
+      title: "英语演讲比赛",
+      description: "‘外研社杯’英语演讲比赛开始报名了，这对提升英语背景很有利。",
+      options: [
+        {
+          text: "报名参加并认真准备",
+          effect: (s) => ({
+            newStats: { ...s, english: s.english + 15, mental: s.mental - 10, stamina: s.stamina - 10 },
+            log: "你进入了决赛，英语水平和自信心都得到了极大提升。"
+          })
+        }
+      ]
+    },
+    {
+      title: "突然的停电",
+      description: "宿舍突然停电了，你的台式机强制关机，且不知道什么时候恢复。",
+      options: [
+        {
+          text: "去图书馆抢带插座的位置",
+          effect: (s) => ({
+            newStats: { ...s, stamina: s.stamina - 10, research: s.research + 2 },
+            log: "虽然折腾，但你保住了学习节奏。"
+          })
+        },
+        {
+          text: "直接上床睡觉",
+          effect: (s) => ({
+            newStats: { ...s, stamina: s.stamina + 20, mental: s.mental + 5 },
+            log: "这波是天意，你难得享受了一个早睡的夜晚。"
+          })
+        }
+      ]
+    },
+    {
+      title: "健身房偶遇",
+      description: "你在健身房遇到了系里的学霸，他正在卧推。",
+      options: [
+        {
+          text: "一起锻炼并交流心得",
+          effect: (s) => ({
+            newStats: { ...s, stamina: s.stamina + 10, mental: s.mental + 10, research: s.research + 2 },
+            log: "健康的体魄是保研的本钱，你们还聊了一些专业话题。"
+          })
+        }
+      ]
+    },
+    {
+      title: "论文被拒",
+      description: "你满怀期待提交的论文被顶会拒了，审稿意见非常刻薄。",
+      options: [
+        {
+          text: "痛定思痛，认真修改",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 10, mental: s.mental - 15 },
+            log: "科研之路从来不是一帆风顺的，你学会了从失败中吸取教训。"
+          })
+        },
+        {
+          text: "借酒消愁，怀疑人生",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental - 30, stamina: s.stamina - 10 },
+            log: "你沉沦了几天，感觉保研之路变得迷茫了。"
+          })
+        }
+      ]
+    },
+    {
+      title: "实验室开放日志愿者",
+      description: "学院举办实验室开放日，导师希望你能去做志愿者讲解员。",
+      options: [
+        {
+          text: "热情讲解",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 5, mental: s.mental + 10, stamina: s.stamina - 10 },
+            log: "你的表现得到了导师和参观者的共同称赞，人际关系提升。"
+          })
+        }
+      ]
+    },
+    {
+      title: "参与编写教材",
+      description: "你的专业课老师正在编写一本新教材，邀请你负责其中一个章节的资料整理。",
+      options: [
+        {
+          text: "协助编写，严谨治学",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 10, mental: s.mental + 5, stamina: s.stamina - 15 },
+            log: "虽然工作量很大，但你的名字出现在了教材的致谢名单里。"
+          })
+        }
+      ]
+    },
+    {
+      title: "专业课补考传闻",
+      description: "听说某门极难的专业课有一半人没及格，大家都在人心惶惶。",
+      options: [
+        {
+          text: "帮同学复习，缓解焦虑",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 15, stamina: s.stamina - 10 },
+            log: "你不仅巩固了知识，还成了班里的‘救世主’。"
+          })
+        },
+        {
+          text: "庆幸自己考得还不错",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 5 },
+            log: "你松了一口气，继续投入到下一步计划中。"
+          })
+        }
+      ]
+    },
+    {
+      title: "目标院校宣讲会",
+      description: "你心仪的院校来校开宣讲会，现场座无虚席。",
+      options: [
+        {
+          text: "挤进前排提问",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 10, research: s.research + 3 },
+            log: "招生老师记住了你的名字，并给了你一份详细的申请指南。"
+          })
+        }
+      ]
+    },
+    {
+      title: "收到导师的回信",
+      description: "你之前试探性发出的联系邮件，竟然收到了大牛导师的亲笔回信！",
+      options: [
+        {
+          text: "激动地反复研读",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 20 },
+            log: "导师表示对你的简历很感兴趣，这让你信心倍增。"
+          })
+        }
+      ]
+    },
+    {
+      title: "学术圈的大瓜",
+      description: "领域内某位‘大牛’被曝论文造假，引起了学术界的震动。",
+      options: [
+        {
+          text: "引以为戒，端正态度",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 5, research: s.research + 2 },
+            log: "你深刻认识到学术诚信的重要性，研究态度更加严谨了。"
+          })
+        }
+      ]
+    },
+    {
+      title: "实验室年终聚餐",
+      description: "实验室组织大家吃火锅，氛围非常轻松。",
+      options: [
+        {
+          text: "与师兄师姐交流心得",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental + 15, research: s.research + 5 },
+            log: "在酒足饭饱之余，你学到了很多实验室的‘生存法则’。"
+          })
+        }
+      ]
+    },
+    {
+      title: "发现论文被引用",
+      description: "你在刷 Google Scholar 时，惊讶地发现自己的论文被一篇顶刊引用了！",
+      options: [
+        {
+          text: "发个朋友圈庆祝一下",
+          effect: (s) => ({
+            newStats: { ...s, research: s.research + 10, mental: s.mental + 10 },
+            log: "你的学术影响力正在慢慢扩大，这种感觉太棒了。"
+          })
+        }
+      ]
+    },
+    {
+      title: "暑期社会实践",
+      description: "你带队前往偏远地区进行教育调研。",
+      options: [
+        {
+          text: "深入基层，撰写报告",
+          effect: (s) => ({
+            newStats: { ...s, competition: s.competition + 10, stamina: s.stamina - 20, mental: s.mental + 15 },
+            log: "这段经历丰富了你的社会阅历，调研报告还获得了校级表彰。"
+          })
+        }
+      ]
+    },
+    {
+      title: "校园网炸了",
+      description: "正要在截止日期前提交申请材料，校园网突然崩溃了。",
+      options: [
+        {
+          text: "用手机热点强行上传",
+          effect: (s) => ({
+            newStats: { ...s, mental: s.mental - 10, moneyChange: -50 },
+            log: "虽然多花了几十块流量费，但总算在最后一刻交上了。"
           })
         }
       ]
@@ -2171,6 +2493,7 @@ export default function App() {
 
       let isGameOver = nextSemester > 7;
       let gameMessage = "";
+      let endingStats = prev.endingStats;
 
       if (newStats.stamina <= 0) {
         isGameOver = true;
@@ -2179,7 +2502,9 @@ export default function App() {
         isGameOver = true;
         gameMessage = "你因为压力过大导致心态崩溃，决定放弃保研，回家修养。";
       } else if (isGameOver) {
-        gameMessage = calculateOutcome(newStats);
+        const outcome = calculateOutcome(newStats);
+        endingStats = outcome;
+        gameMessage = outcome.title + "\n" + outcome.detail;
       }
 
       // Random Event Check (15% chance)
@@ -2207,6 +2532,7 @@ export default function App() {
         mentors: updatedMentors,
         isGameOver,
         gameMessage,
+        endingStats,
         currentEvent,
         masteryEfficiency: 1.0,   // 重置效率倍率
         researchEfficiency: 1.0,
@@ -2219,6 +2545,98 @@ export default function App() {
         showWeeklySummary: !showExamReport,
         purchaseCounts: {},
         logs: [...prev.logs, `第 ${prev.week} 周结算完成。`, ...weeklyLogs]
+      };
+    });
+  };
+
+  const handleSkipToSummerCamp = () => {
+    // 获取大三下学期（第6学期）的必修课
+    const semester6Compulsory = ALL_COURSES.filter(c => 
+      c.semester === 6 && 
+      c.type === 'compulsory' && 
+      (!c.majorRestriction || c.majorRestriction.includes(state.majorType))
+    );
+
+    setState(prev => ({
+      ...prev,
+      semester: 6,
+      week: 1,
+      phase: 'summer_camp',
+      courses: semester6Compulsory,
+      stats: {
+        ...prev.stats,
+        gpa: Math.max(prev.stats.gpa, 3.8 + Math.random() * 0.4),
+        english: Math.max(prev.stats.english, 85),
+        stamina: 100,
+        mental: 100
+      },
+      money: Math.max(prev.money, 3000),
+      social: {
+        ...prev.social,
+        seniors: Math.max(prev.social.seniors, 80)
+      },
+      resume: [
+        ...prev.resume,
+        { id: 'skip-1', type: 'research', name: '大三实验室科研项目', score: 40, quality: 'rare' },
+        { id: 'skip-2', type: 'competition', name: '全国大学生数学建模竞赛二等奖', score: 50, quality: 'epic' }
+      ].slice(0, 10), // 避免重复添加
+      logs: [...prev.logs, "--- 已使用调试功能跳过至夏令营阶段 ---", "你的各项属性已根据大三学霸的标准进行了同步提升。"]
+    }));
+  };
+
+  const handleSkipToPreRecommendation = () => {
+    // 获取大四上学期（第7学期）的必修课
+    const semester7Compulsory = ALL_COURSES.filter(c => 
+      c.semester === 7 && 
+      c.type === 'compulsory' && 
+      (!c.majorRestriction || c.majorRestriction.includes(state.majorType))
+    );
+
+    setState(prev => ({
+      ...prev,
+      semester: 7,
+      week: 1,
+      phase: 'pre_recommendation',
+      courses: semester7Compulsory,
+      stats: {
+        ...prev.stats,
+        gpa: Math.max(prev.stats.gpa, 4.0 + Math.random() * 0.3),
+        english: Math.max(prev.stats.english, 90),
+        stamina: 100,
+        mental: 100
+      },
+      money: Math.max(prev.money, 4000),
+      social: {
+        ...prev.social,
+        seniors: Math.max(prev.social.seniors, 90)
+      },
+      resume: [
+        ...prev.resume,
+        { id: 'skip-3', type: 'research', name: 'SCI/EI 核心期刊论文发表', score: 80, quality: 'epic' },
+        { id: 'skip-4', type: 'competition', name: '全国大学生计算机设计大赛一等奖', score: 70, quality: 'epic' }
+      ].slice(0, 15),
+      logs: [...prev.logs, "--- 已使用调试功能跳过至预推免阶段 ---", "你的各项属性已根据保研大佬的标准进行了同步提升。"]
+    }));
+  };
+
+  const handleSkipToGameOver = () => {
+    setState(prev => {
+      const finalStats = {
+        ...prev.stats,
+        gpa: Math.max(prev.stats.gpa, 4.1),
+        research: Math.max(prev.stats.research, 80),
+        competition: Math.max(prev.stats.competition, 80)
+      };
+      
+      const outcome = calculateOutcome(finalStats);
+      
+      return {
+        ...prev,
+        semester: 8,
+        isGameOver: true,
+        endingStats: outcome,
+        gameMessage: outcome.title + "\n" + outcome.detail,
+        logs: [...prev.logs, "--- 已使用调试功能跳过至游戏结局 ---"]
       };
     });
   };
@@ -2355,10 +2773,13 @@ export default function App() {
 
         let isGameOver = prev.isGameOver;
         let gameMessage = prev.gameMessage;
+        let endingStats = prev.endingStats;
 
         if (currentInterview.phase === 'pre_recommendation' && isAccepted) {
           isGameOver = true;
-          gameMessage = calculateOutcome(prev.stats, { university: currentInterview.university, major: currentInterview.major });
+          const outcome = calculateOutcome(prev.stats, { university: currentInterview.university, major: currentInterview.major });
+          endingStats = outcome;
+          gameMessage = outcome.title + "\n" + outcome.detail;
         }
 
         const logMsg = `面试反馈 (${currentInterview.university}): ${option.feedback} 最终综合评分: ${finalScore.toFixed(1)}。${isAccepted ? '恭喜你被拟录取！' : '很遗憾，未通过最终考核。'}`;
@@ -2369,6 +2790,7 @@ export default function App() {
           currentInterview: null,
           isGameOver,
           gameMessage,
+          endingStats,
           logs: [...prev.logs, logMsg]
         };
       });
@@ -2401,15 +2823,30 @@ export default function App() {
   const calculateOutcome = (stats: PlayerStats, successApp?: { university: string; major: string }) => {
     // If no explicit successApp, look for any accepted applications in state
     const finalSuccess = successApp || state.applications.find(a => a.status === 'accepted');
+    
+    let title = "";
+    let detail = "";
+    let fancyQuote = "";
+
+    const fancyQuotes = [
+      "保研不是终点，而是通往更广阔世界的入场券。",
+      "在无数个寂静的深夜里，你种下的每一颗汗水，都在此刻开出了花。",
+      "所谓天才，不过是选择了那条最孤独、也最坚定的道路。",
+      "学术的巅峰固然迷人，但攀登的过程本身就是一种意义。",
+      "有些路，只能一个人走；有些光，注定要照亮前行的方向。",
+      "生活从不亏待每一个清醒地努力着的人。",
+      "乾坤未定，你我皆是黑马；尘埃落定，你已身在巅峰。"
+    ];
+
+    fancyQuote = fancyQuotes[Math.floor(Math.random() * fancyQuotes.length)];
 
     if (finalSuccess) {
       const targetUni = UNIVERSITIES.find(u => u.name === finalSuccess.university);
-      
-      let prefix = "【最终结局：保研成功】\n";
-      let detail = "";
+      title = "【最终结局：保研成功】";
       
       if (targetUni?.tier === 'T0') {
         detail = `你在 ${state.university} 的四年努力终于迎来了最高光的时刻。作为 ${state.major} 专业的佼佼者，你成功保研至 ${finalSuccess.university} ${finalSuccess.major} 专业。这是国内最顶尖的学术殿堂，未来不可限量。`;
+        fancyQuote = "这世上只有一种真正的英雄主义，那就是在看清学术的真相后，依然热爱它。";
       } else if (targetUni?.tier === 'T1') {
         detail = `你凭借出色的综合素质，成功保研至 ${finalSuccess.university} ${finalSuccess.major} 专业。华五名校的科研氛围将助你在学术道路上更进一步。`;
       } else if (finalSuccess.university === state.university) {
@@ -2417,43 +2854,63 @@ export default function App() {
       } else {
         detail = `你成功通过夏令营和预推免的层层选拔，保研至 ${finalSuccess.university} ${finalSuccess.major} 专业。新的环境意味着新的开始，祝你在学术之路上越走越远。`;
       }
-      
-      return prefix + detail;
+    } else {
+      // --- 失败结局细化 ---
+      if (stats.english > 85 && state.money > 15000) {
+        title = "【最终结局：出国深造】";
+        detail = "虽然国内保研之路未能如愿，但你凭借优异的英语成绩和充足的资金储备，成功申请到了海外名校的 Master 项目。换个赛道，你依然是赢家。";
+        fancyQuote = "世界的边界，就是你认知的边界。星辰大海，才是你的归宿。";
+      } else if (state.social.seniors > 85 && stats.gpa > 3.2) {
+        title = "【最终结局：支教保研】";
+        detail = "你虽然没有在学术赛道上拿到满意的 Offer，但凭借极高的人脉评分和丰富的学生工作经验，成功申请到了“支教保研”名额。在西部的三尺讲台上，你将书写另一种青春。";
+        fancyQuote = "用一年不长的时间，做一件终生难忘的事。";
+      } else if (stats.gpa > 4.0 && stats.mental > 60) {
+        title = "【最终结局：考研战神】";
+        detail = "保研名额的遗憾错失并没有击垮你。你迅速调整心态投入考研，凭借四年积累的深厚功底，在随后的全国研究生统一考试中发挥神勇，最终以初试第一的成绩考入了最初的目标院校。";
+        fancyQuote = "杀不死我的，终将使我更强大。";
+      } else if (stats.competition > 80 && state.social.classmates > 70) {
+        title = "【最终结局：职场精英】";
+        detail = "保研失败后，你凭借手里沉甸甸的竞赛奖牌和优秀的社交能力，成功拿到了某大厂的校招高薪 Offer。你发现，比起科研，你似乎更适合在快节奏的职场中发光发热。";
+        fancyQuote = "在象牙塔外，你依然可以定义自己的规则。";
+      } else if (stats.mental < 40) {
+        title = "【最终结局：遗憾二战】";
+        detail = "保研过程中的巨大压力和最终的落榜让你感到精疲力竭。你决定给自己放一个长假，回家在父母的陪伴下修整一段时间，准备来年再战。这一次，你会更加从容。";
+        fancyQuote = "暂时的退后，是为了下一次更有力的跳跃。";
+      } else {
+        title = "【最终结局：职场新人】";
+        detail = "保研未能如愿，你略显仓促地进入了就业市场。虽然起步阶段略有坎坷，但凭借大学四年打下的专业基础，你相信只要脚踏实地，未来依然可期。";
+      }
     }
 
-    // --- 失败结局细化 ---
+    const summerCampApps = state.applications.filter(a => a.phase === 'summer_camp');
+    const preRecApps = state.applications.filter(a => a.phase === 'pre_recommendation');
 
-    // 出国深造：高英语 + 高金钱
-    if (stats.english > 85 && state.money > 15000) {
-      return "【最终结局：出国深造】\n虽然国内保研之路未能如愿，但你凭借优异的英语成绩和充足的资金储备，成功申请到了海外名校的 Master 项目。换个赛道，你依然是赢家。";
-    }
-    
-    // 支教保研：高人脉 + 较好成绩
-    if (state.social.seniors > 85 && stats.gpa > 3.2) {
-      return "【最终结局：支教保研】\n你虽然没有在学术赛道上拿到满意的 Offer，但凭借极高的人脉评分和丰富的学生工作经验，成功申请到了“支教保研”名额。在西部的三尺讲台上，你将书写另一种青春，之后再回校深造。";
-    }
+    const outcome = {
+      title,
+      detail,
+      fancyQuote,
+      careerStats: {
+        finalGpa: stats.gpa,
+        totalResumeScore: state.resume.reduce((sum, item) => sum + item.score, 0),
+        finalEnglish: stats.english,
+        finalSocial: (state.social.classmates + state.social.seniors) / 2,
+        finalMoney: state.money
+      },
+      applicationStats: {
+        summerCamp: {
+          applied: summerCampApps.length,
+          interviews: summerCampApps.filter(a => a.status !== 'rejected' && a.status !== 'pending').length,
+          offers: summerCampApps.filter(a => a.status === 'accepted').length
+        },
+        preRec: {
+          applied: preRecApps.length,
+          interviews: preRecApps.filter(a => a.status !== 'rejected' && a.status !== 'pending').length,
+          offers: preRecApps.filter(a => a.status === 'accepted').length
+        }
+      }
+    };
 
-    // 考研上岸：高绩点 + 高心态
-    if (stats.gpa > 4.0 && stats.mental > 60) {
-      return "【最终结局：考研战神】\n保研名额的遗憾错失并没有击垮你。你迅速调整心态投入考研，凭借四年积累的深厚功底，在随后的全国研究生统一考试中发挥神勇，最终以初试第一的成绩考入了最初的目标院校。";
-    }
-
-    // 大厂就业：高竞赛 + 高社交
-    if (stats.competition > 80 && state.social.classmates > 70) {
-      return "【最终结局：职场精英】\n保研失败后，你凭借手里沉甸甸的竞赛奖牌和优秀的社交能力，成功拿到了某大厂的校招高薪 Offer。你发现，比起科研，你似乎更适合在快节奏的职场中发光发热。";
-    }
-
-    // 二战考研：低心态
-    if (stats.mental < 40) {
-      return "【最终结局：遗憾二战】\n保研过程中的巨大压力和最终的落榜让你感到精疲力竭。你决定给自己放一个长假，回家在父母的陪伴下修整一段时间，准备来年再战。这一次，你会更加从容。";
-    }
-
-    // 考公上岸：高社交 + 较好绩点
-    if (state.social.classmates > 80 && stats.gpa > 3.0) {
-      return "【最终结局：公职生涯】\n在同窗好友的鼓励下，你转战公考赛道。凭借扎实的逻辑基础和优秀的面试表现，你成功录用为某省直机关公务员。在这个稳定的岗位上，你开始了为人民服务的新篇章。";
-    }
-
-    return "【最终结局：职场新人】\n保研未能如愿，你略显仓促地进入了就业市场。虽然起步阶段略有坎坷，但凭借大学四年打下的专业基础，你相信只要脚踏实地，未来依然可期。";
+    return outcome;
   };
 
   const calculateSuccessChance = () => {
@@ -2563,20 +3020,20 @@ export default function App() {
         description: "听大佬分享学术前沿。", 
         icon: <Lightbulb className="w-5 h-5" />, 
         cost: { stamina: -8, mental: 5 }, 
-        gain: { research: 3, mental: 8 } 
+        gain: { research: 6, mental: 10 } 
       },
       { 
         name: "学生会工作", 
         description: "锻炼组织协调能力。", 
         icon: <Award className="w-5 h-5" />, 
-        cost: { stamina: -20, mental: -10 }, 
-        gain: { mental: 20, competition: 3 } 
+        cost: { stamina: -10, mental: -10 }, 
+        gain: { mental: 20, competition: 5 } 
       },
       { 
         name: "刷绩点神器", 
         description: "疯狂刷往年题和课后作业。", 
         icon: <Book className="w-5 h-5" />, 
-        cost: { stamina: -25, mental: -15 }, 
+        cost: { stamina: -40, mental: -5 }, 
         gain: { mastery: 50 } 
       },
     ];
@@ -2587,28 +3044,28 @@ export default function App() {
           name: "刷算法题", 
           description: "LeetCode, Codeforces...", 
           icon: <Cpu className="w-5 h-5" />, 
-          cost: { stamina: -15, mental: -10 }, 
-          gain: { competition: 10, mastery: 8 } 
+          cost: { stamina: -20, mental: -10 }, 
+          gain: { competition: 15, mastery: 10 } 
         },
         { 
           name: "开发个人项目", 
           description: "写个有趣的开源工具。", 
           icon: <Lightbulb className="w-5 h-5" />, 
           cost: { stamina: -20, mental: -5 }, 
-          gain: { research: 8, competition: 3, mastery: 12 } 
+          gain: { research: 1, competition: 20, mastery: 12 } 
         },
         { 
           name: "参加黑客马拉松", 
           description: "48小时不眠不休极限编程。", 
           icon: <Zap className="w-5 h-5" />, 
-          cost: { stamina: -40, mental: -20 }, 
-          gain: { competition: 25, research: 8, mastery: 20 } 
+          cost: { stamina: -40, mental: -30 }, 
+          gain: { competition: 30, research: 1, mastery: 8 } 
         },
         { 
           name: "深度钻研OS/内核", 
           description: "硬核底层技术钻研。", 
           icon: <Cpu className="w-5 h-5" />, 
-          cost: { stamina: -25, mental: -15 }, 
+          cost: { stamina: -25, mental: -25 }, 
           gain: { research: 15, mastery: 30 } 
         },
         { 
@@ -2616,14 +3073,14 @@ export default function App() {
           description: "提前感受996的洗礼。", 
           icon: <TrendingUp className="w-5 h-5" />, 
           cost: { stamina: -50, mental: -30 }, 
-          gain: { research: 20, money: 2000, mastery: 15 } 
+          gain: { research: 10, money: 2000, mastery: 8 } 
         },
         { 
           name: "论文复现", 
           description: "复现顶会 SOTA 模型。", 
           icon: <Book className="w-5 h-5" />, 
-          cost: { stamina: -20, mental: -10 }, 
-          gain: { research: 15, mastery: 10 } 
+          cost: { stamina: -20, mental: -40 }, 
+          gain: { research: 25, mastery: 10 } 
         },
       ],
       ee: [
@@ -3278,10 +3735,10 @@ export default function App() {
                       </span>
                     ) : isLowerTier ? (
                       <button
-                        disabled
-                        className="px-4 py-1.5 bg-slate-700 text-slate-500 rounded-full text-sm font-bold cursor-not-allowed whitespace-nowrap"
+                        onClick={() => handleApplication(uni, state.phase as 'summer_camp' | 'pre_recommendation')}
+                        className="px-4 py-1.5 bg-purple-600 hover:bg-purple-500 text-white rounded-full text-sm font-bold transition-all whitespace-nowrap"
                       >
-                        不可申请
+                        提交申请
                       </button>
                     ) : (
                       <button
@@ -3377,6 +3834,33 @@ export default function App() {
               {state.semester >= 2 && state.semester < 4 && "开始寻找实验室，参加数学建模。"}
               {state.semester >= 4 && "准备夏令营，冲刺英语和论文。"}
             </p>
+          </div>
+
+          <div className="bg-slate-900/50 border border-slate-800 border-dashed rounded-xl p-5">
+            <h3 className="font-bold mb-3 flex items-center gap-2 text-slate-500">
+              <Zap size={18} />
+              开发者工具
+            </h3>
+            <div className="space-y-2">
+              <button
+                onClick={handleSkipToSummerCamp}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition-colors border border-slate-700"
+              >
+                跳过至夏令营 (大三下)
+              </button>
+              <button
+                onClick={handleSkipToPreRecommendation}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition-colors border border-slate-700"
+              >
+                跳过至预推免 (大四上)
+              </button>
+              <button
+                onClick={handleSkipToGameOver}
+                className="w-full py-2 bg-slate-800 hover:bg-slate-700 text-slate-300 rounded-lg text-xs font-medium transition-colors border border-slate-700"
+              >
+                跳过至结局 (结算)
+              </button>
+            </div>
           </div>
         </div>
 
@@ -3503,17 +3987,129 @@ export default function App() {
             </div>
             
             {state.isGameOver ? (
-              <div className="text-center py-8 space-y-4">
-                <h2 className="text-3xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
-                  模拟结束
-                </h2>
-                <p className="text-xl">{state.gameMessage}</p>
-                <button 
-                  onClick={() => window.location.reload()}
-                  className="px-6 py-2 bg-blue-600 hover:bg-blue-500 rounded-lg transition-colors font-bold"
-                >
-                  重新开始
-                </button>
+              <div className="py-6 space-y-8 animate-in fade-in zoom-in duration-500">
+                <div className="text-center space-y-2">
+                  <div className="inline-block p-3 bg-blue-500/20 rounded-2xl mb-2">
+                    <Trophy className="w-12 h-12 text-blue-400" />
+                  </div>
+                  <h2 className="text-4xl font-black text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-500">
+                    模拟结束
+                  </h2>
+                  <p className="text-2xl font-bold text-slate-100 mt-4">{state.endingStats?.title || "保研之旅告一段落"}</p>
+                </div>
+
+                <div className="bg-slate-800/50 border border-slate-700 rounded-2xl p-6 relative overflow-hidden">
+                  <div className="absolute top-0 right-0 p-4 opacity-10">
+                    <GraduationCap size={80} />
+                  </div>
+                  <p className="text-slate-300 leading-relaxed relative z-10 text-lg">
+                    {state.endingStats?.detail || state.gameMessage}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {/* 夏令营统计 */}
+                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5">
+                    <h3 className="text-sm font-bold text-blue-400 mb-4 flex items-center gap-2">
+                      <Target size={16} /> 夏令营战报
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <div className="text-xl font-black text-slate-100">{state.endingStats?.applicationStats.summerCamp.applied || 0}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">投递</div>
+                      </div>
+                      <div>
+                        <div className="text-xl font-black text-slate-100">{state.endingStats?.applicationStats.summerCamp.interviews || 0}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">入营</div>
+                      </div>
+                      <div>
+                        <div className="text-xl font-black text-green-400">{state.endingStats?.applicationStats.summerCamp.offers || 0}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">优秀营员</div>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* 预推免统计 */}
+                  <div className="bg-slate-800/40 border border-slate-700/50 rounded-xl p-5">
+                    <h3 className="text-sm font-bold text-purple-400 mb-4 flex items-center gap-2">
+                      <Zap size={16} /> 预推免战报
+                    </h3>
+                    <div className="grid grid-cols-3 gap-2 text-center">
+                      <div>
+                        <div className="text-xl font-black text-slate-100">{state.endingStats?.applicationStats.preRec.applied || 0}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">投递</div>
+                      </div>
+                      <div>
+                        <div className="text-xl font-black text-slate-100">{state.endingStats?.applicationStats.preRec.interviews || 0}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">面试</div>
+                      </div>
+                      <div>
+                        <div className="text-xl font-black text-green-400">{state.endingStats?.applicationStats.preRec.offers || 0}</div>
+                        <div className="text-[10px] text-slate-500 uppercase tracking-wider">拟录取</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* 生涯统计 */}
+                <div className="bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+                  <h3 className="text-sm font-bold text-slate-400 mb-6 flex items-center gap-2">
+                    <BarChart3 size={16} /> 四年生涯统计
+                  </h3>
+                  <div className="grid grid-cols-2 sm:grid-cols-4 gap-6">
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
+                        <Award size={12} /> 最终绩点
+                      </div>
+                      <div className="text-2xl font-black text-indigo-400">
+                        {state.endingStats?.careerStats.finalGpa.toFixed(2) || state.stats.gpa.toFixed(2)}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
+                        <Briefcase size={12} /> 简历分
+                      </div>
+                      <div className="text-2xl font-black text-cyan-400">
+                        {state.endingStats?.careerStats.totalResumeScore || 0}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
+                        <Users size={12} /> 社交评分
+                      </div>
+                      <div className="text-2xl font-black text-pink-400">
+                        {Math.floor(state.endingStats?.careerStats.finalSocial || 0)}
+                      </div>
+                    </div>
+                    <div className="space-y-1">
+                      <div className="flex items-center gap-1.5 text-slate-500 text-xs mb-1">
+                        <DollarSign size={12} /> 结余金钱
+                      </div>
+                      <div className="text-2xl font-black text-amber-400">
+                        ￥{state.endingStats?.careerStats.finalMoney || state.money}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="text-center space-y-6 pt-4">
+                  <div className="relative inline-block">
+                    <div className="absolute -inset-1 bg-gradient-to-r from-blue-500 to-purple-600 rounded-lg blur opacity-20"></div>
+                    <p className="relative italic text-slate-400 text-lg px-8 py-4 bg-slate-900/80 rounded-lg border border-slate-800">
+                      " {state.endingStats?.fancyQuote || "保研之路，始于足下。"} "
+                    </p>
+                  </div>
+                  
+                  <div className="flex justify-center gap-4">
+                    <button 
+                      onClick={() => window.location.reload()}
+                      className="px-10 py-4 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white rounded-xl transition-all font-bold shadow-lg shadow-blue-900/20 flex items-center gap-2 group"
+                    >
+                      重新开启新人生
+                      <ChevronRight size={20} className="group-hover:translate-x-1 transition-transform" />
+                    </button>
+                  </div>
+                </div>
               </div>
             ) : activeTab === 'actions' ? (
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 overflow-y-auto pr-1 custom-scrollbar">
