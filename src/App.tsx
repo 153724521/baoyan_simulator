@@ -14,13 +14,9 @@ import {
   AlertCircle,
   Users,
   ChevronRight,
-  Smile,
-  Frown,
-  Search,
   Trophy,
   BarChart3,
   Target,
-  Compass,
   DollarSign,
   Briefcase
 } from 'lucide-react';
@@ -33,10 +29,6 @@ function cn(...inputs: ClassValue[]) {
 }
 
 // --- Types ---
-type StatType = 'gpa' | 'research' | 'competition' | 'english' | 'mental' | 'stamina';
-type GamePhase = 'start' | 'gaokao' | 'university_selection' | 'university_failed' | 'course_selection' | 'main_game' | 'exam' | 'summer_camp' | 'pre_recommendation' | 'game_over';
-type MajorType = 'cs' | 'biology' | 'humanities' | 'general' | 'ee' | 'medicine' | 'law' | 'art';
-
 interface PlayerStats {
   gpa: number;         // 绩点 (0-4.5)
   research: number;    // 科研/项目 (0-100)
@@ -45,6 +37,9 @@ interface PlayerStats {
   mental: number;      // 心态 (0-100)
   stamina: number;     // 体力 (0-100)
 }
+
+type GamePhase = 'start' | 'gaokao' | 'university_selection' | 'university_failed' | 'course_selection' | 'main_game' | 'exam' | 'summer_camp' | 'pre_recommendation' | 'game_over';
+type MajorType = 'cs' | 'biology' | 'humanities' | 'general' | 'ee' | 'medicine' | 'law' | 'art';
 
 interface GameEvent {
   title: string;
@@ -204,7 +199,7 @@ interface Action {
   description: string;
   icon: React.ReactNode;
   cost: Partial<PlayerStats> & { money?: number };
-  gain: Partial<PlayerStats> & { mastery?: number };
+  gain: Partial<PlayerStats> & { mastery?: number; money?: number };
   socialGain?: {
     classmates?: number;
     seniors?: number;
@@ -936,6 +931,7 @@ export default function App() {
     isGameOver: false,
     gameMessage: "",
     currentEvent: null,
+    currentInterview: null,
     background: "",
     gaokaoScore: 0,
     university: "",
@@ -953,6 +949,7 @@ export default function App() {
     selectedActions: [],
     weekSummary: { gains: {}, logs: [] },
     showWeeklySummary: false,
+    purchaseCounts: {},
   });
 
   const BACKGROUNDS = [
@@ -2017,7 +2014,8 @@ export default function App() {
         id: Math.random().toString(36).substr(2, 9),
         type: isResearch ? 'research' : 'competition',
         name: isResearch ? projectNames[Math.floor(Math.random() * projectNames.length)] : compNames[Math.floor(Math.random() * compNames.length)],
-        score: 10 + Math.floor(Math.random() * 10) // 闲鱼买来的分数稍低一些
+        score: 10 + Math.floor(Math.random() * 10), // 闲鱼买来的分数稍低一些
+        quality: 'common' // 添加quality属性
       };
       
       return {
@@ -2577,8 +2575,8 @@ export default function App() {
       },
       resume: [
         ...prev.resume,
-        { id: 'skip-1', type: 'research', name: '大三实验室科研项目', score: 40, quality: 'rare' },
-        { id: 'skip-2', type: 'competition', name: '全国大学生数学建模竞赛二等奖', score: 50, quality: 'epic' }
+        { id: 'skip-1', type: 'research' as const, name: '大三实验室科研项目', score: 40, quality: 'rare' as const },
+        { id: 'skip-2', type: 'competition' as const, name: '全国大学生数学建模竞赛二等奖', score: 50, quality: 'epic' as const }
       ].slice(0, 10), // 避免重复添加
       logs: [...prev.logs, "--- 已使用调试功能跳过至夏令营阶段 ---", "你的各项属性已根据大三学霸的标准进行了同步提升。"]
     }));
@@ -2612,8 +2610,8 @@ export default function App() {
       },
       resume: [
         ...prev.resume,
-        { id: 'skip-3', type: 'research', name: 'SCI/EI 核心期刊论文发表', score: 80, quality: 'epic' },
-        { id: 'skip-4', type: 'competition', name: '全国大学生计算机设计大赛一等奖', score: 70, quality: 'epic' }
+        { id: 'skip-3', type: 'research' as const, name: 'SCI/EI 核心期刊论文发表', score: 80, quality: 'epic' as const },
+        { id: 'skip-4', type: 'competition' as const, name: '全国大学生计算机设计大赛一等奖', score: 70, quality: 'epic' as const }
       ].slice(0, 15),
       logs: [...prev.logs, "--- 已使用调试功能跳过至预推免阶段 ---", "你的各项属性已根据保研大佬的标准进行了同步提升。"]
     }));
@@ -2716,7 +2714,7 @@ export default function App() {
         const newApplications = [...prev.applications, { 
           university: uni.name, 
           major: prev.major, 
-          status: 'interviewing', 
+          status: 'interviewing' as const, 
           phase 
         }];
 
@@ -2730,7 +2728,7 @@ export default function App() {
         const newApplications = [...prev.applications, { 
           university: uni.name, 
           major: prev.major, 
-          status: 'rejected', 
+          status: 'rejected' as const, 
           phase 
         }];
         return {
@@ -3396,7 +3394,7 @@ export default function App() {
     return [...baseActions, ...(majorActions[state.majorType] || [])];
   };
 
-  const actions = getActions();
+
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
@@ -3659,8 +3657,8 @@ export default function App() {
                     key={i} 
                     className={cn(
                       "w-12 h-1.5 rounded-full transition-all",
-                      i === state.currentInterview.currentQuestionIndex ? "bg-purple-500" : 
-                      i < state.currentInterview.currentQuestionIndex ? "bg-purple-900" : "bg-slate-800"
+                      i === state.currentInterview!.currentQuestionIndex ? "bg-purple-500" : 
+                      i < state.currentInterview!.currentQuestionIndex ? "bg-purple-900" : "bg-slate-800"
                     )} 
                   />
                 ))}
