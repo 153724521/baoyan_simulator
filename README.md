@@ -1,6 +1,9 @@
 # 保研模拟器 (Baoyan Simulator)
 
 一个模拟大学生从高考到保研全过程的互动游戏，体验保研路上的各种挑战与机遇。
+github-pages
+Lastdeployedon Jan 28
+https://153724521.github.io/baoyan_simulator/
 
 ## 🌟 功能特性
 
