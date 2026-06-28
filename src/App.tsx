@@ -23,9 +23,12 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// 导入模块化的常量（阶段4进行中，暂时只导入已迁移的SEMESTER_NAMES）
+// 导入模块化的常量和函数（阶段4进行中）
 import {
-  SEMESTER_NAMES
+  SEMESTER_NAMES,
+  INITIAL_STATS,
+  INITIAL_MENTORS,
+  generateNewMentorBatch
 } from './modules';
 
 // --- Utility ---
@@ -642,45 +645,7 @@ const ALL_COURSES: Course[] = [
   { id: 'def1-e1', name: '学术交流技巧', difficulty: 2, credit: 2, type: 'elective', semester: 1, mastery: 0, description: '如何优雅地展示科研成果。' },
 ];
 
-const INITIAL_MENTORS: Mentor[] = [
-];
-
-const MENTOR_DATA: Record<MajorType, { schools: string[], fields: string[] }> = {
-  cs: {
-    schools: ['计算机学院', '软件学院', '人工智能学院', '网络空间安全学院', '数据科学研究院', '交叉信息研究院', '软件研发中心', '云计算实验室', '图灵奖实验室', '多媒体研究所', '嵌入式系统国家重点实验室', '超算中心'],
-    fields: ['大语言模型', '计算机视觉', '分布式系统', '形式化验证', '量子计算', '人机交互', '隐私计算', '编译器优化', '图神经网络', '强化学习', '操作系统内核', '数据库查询优化', '边缘计算', '三维重建', '自然语言处理', '软件测试']
-  },
-  biology: {
-    schools: ['生命科学学院', '医学院', '生物医学工程系', '基础医学研究所', '生命科学联合中心', '脑科学研究院', '植物分子生物学中心', '结构生物学实验室', '冷冻电镜中心', '合成生物学重点实验室', '生物信息研究所', '海洋生物研究中心'],
-    fields: ['基因编辑', '蛋白质结构预测', '神经生物学', '干细胞研究', '合成生物学', '生物信息学', '免疫学研究', '植物抗逆基因', '冷冻电镜技术', '代谢组学', '化学生物学', '神经退行性疾病', '单细胞测序', '药靶筛选', '表观遗传学', '生态多样性']
-  },
-  humanities: {
-    schools: ['文学院', '历史学系', '哲学系', '社会学系', '艺术学理论研究院', '国际汉学研究中心', '出土文献保护中心', '非物质文化遗产研究所', '古籍整理研究所', '人类学系', '政治学研究中心', '跨文化传播研究院'],
-    fields: ['数字人文', '明清史研究', '先秦哲学', '跨文化比较', '比较文学', '社会调查方法', '出土文献研究', '近代报刊史', '伦理学前沿', '古典文献学', '民俗文化遗产', '文学社会学', '媒介考古', '口述史', '应用伦理', '文化政策']
-  },
-  ee: {
-    schools: ['电子工程系', '集成电路学院', '信息与通信工程学院', '自动化系', '微电子所', '光电子技术研究所', '空天信息研究院', '智能感知实验室', '毫米波国家重点实验室', '微机电系统(MEMS)研究中心', '光通信实验室', '电磁兼容研究室'],
-    fields: ['射频电路', '光电信息', '5G/6G通信', '控制理论', '机器人学', '半导体材料', '模拟电路设计', '雷达信号处理', '柔性电子', '光纤通信', '电力电子', '微纳机电系统(NEMS)', '存算一体芯片', '光通信网络', '卫星互联网', '柔性显示']
-  },
-  medicine: {
-    schools: ['基础医学院', '公共卫生学院', '药学院', '附属第一医院', '转化医学中心', '临床肿瘤研究所', '口腔医学院', '护理学院', '全科医学系', '法医学研究所', '医学影像中心', '生殖医学中心'],
-    fields: ['肿瘤精准治疗', '流行病学', '药物筛选', '影像医学', '心血管病学', '再生医学', '临床解剖学', '靶向药物开发', '中西医结合', '老年医学', '罕见病基因治疗', '疫苗研发', '微创手术机器人', '神经外科学', '药动学', '公共卫生政策']
-  },
-  law: {
-    schools: ['法学院', '知识产权学院', '国际法研究所', '人权研究院', '法律大数据中心', '司法案例研究中心', '环境法治研究院', '海商法研究中心', '金融法研究中心', '比较法研究院', '劳动法与社会保障研究所', '立法研究中心'],
-    fields: ['民商法', '刑法学', '国际公法', '法理学', '环境法', '数字法学', '证据法学', '破产法', '数据安全立法', '法律人工智能', '金融监管法', '劳动法与社会保障', '涉外法治', '仲裁法', '财税法', '法律经济学']
-  },
-  art: {
-    schools: ['美术学院', '设计学院', '电影电视学院', '音乐学院', '新媒体艺术系', '建筑设计研究院', '工艺美术研究所', '数字创意中心', '公共艺术研究中心', '时尚设计系', '文化遗产保护中心', '动画学院'],
-    fields: ['视觉传达', '工业设计', '电影导演', '艺术史论', '数字媒体艺术', '交互设计', '当代艺术创作', '建筑遗产保护', '非遗文创开发', '虚拟现实艺术', '可持续设计', '声音艺术', '策展实践', '传统手工艺', '服装设计', '环境艺术']
-  },
-  general: {
-    schools: ['理学院', '经管学院', '公共管理学院', '外语学院', '体育教研部', '数学科学中心', '理论物理研究所', '创新管理学院', '教育研究院', '国际关系学院', '心理学系', '新闻与传播学院'],
-    fields: ['宏观经济学', '应用统计学', '量子物理', '高能物理', '运筹学', '国际关系', '认知心理学', '动力系统', '偏微分方程', '资产定价', '产业政策', '跨文化翻译', '行为金融学', '教育测量', '博弈论', '危机传播']
-  }
-};
-
-const RESUME_DATA_POOL: { 
+const RESUME_DATA_POOL: {
   research: { name: string, quality: ResumeQuality, scoreRange: [number, number] }[],
   competition: { name: string, quality: ResumeQuality, scoreRange: [number, number] }[] 
 } = {
@@ -808,33 +773,8 @@ const RESUME_DATA_POOL: {
   ]
 };
 
-const generateRandomMentor = (majorType?: MajorType, university?: string): Mentor => {
-  const lastNames = ['张', '王', '李', '赵', '刘', '陈', '杨', '周', '吴', '徐', '孙', '胡', '朱', '高', '林', '何', '郭', '马', '罗', '梁'];
-  const firstNames = ['强', '伟', '芳', '娜', '敏', '静', '杰', '涛', '勇', '军', '明', '红', '磊', '洋', '艳', '勇', '斌', '霞', '平', '凡'];
-  const titles = ['教授', '副教授', '助理教授', '博导', '杰青', '长江学者', '院士'];
-  
-  // 仅推荐玩家所选专业相关的导师
-  const effectiveMajor = majorType || (Object.keys(MENTOR_DATA)[Math.floor(Math.random() * 8)] as MajorType);
-  const data = MENTOR_DATA[effectiveMajor];
-  
-  return {
-    id: Math.random().toString(36).substr(2, 9),
-    name: lastNames[Math.floor(Math.random() * lastNames.length)] + firstNames[Math.floor(Math.random() * firstNames.length)],
-    title: titles[Math.floor(Math.random() * titles.length)],
-    reputation: Math.floor(Math.random() * 60) + 40,
-    friendship: 0,
-    university: university || UNIVERSITIES[Math.floor(Math.random() * UNIVERSITIES.length)].name,
-    school: data.schools[Math.floor(Math.random() * data.schools.length)],
-    researchField: data.fields[Math.floor(Math.random() * data.fields.length)],
-    status: 'none'
-  };
-};
-
-const generateNewMentorBatch = (count: number, majorType?: MajorType): Mentor[] => {
-  return Array.from({ length: count }, () => generateRandomMentor(majorType));
-};
 const MAJORS: { name: string; type: MajorType; description: string; bonus: string }[] = [
-  { 
+  {
     name: "计算机科学与技术", 
     type: "cs", 
     description: "卷王聚集地。竞赛和实习是重头戏，GPA压力极大。",
@@ -907,15 +847,6 @@ const MAJORS: { name: string; type: MajorType; description: string; bonus: strin
     bonus: "GPA收益+25%，心态消耗大" 
   },
 ];
-
-const INITIAL_STATS: PlayerStats = {
-  gpa: 0.0,
-  research: 0,
-  competition: 0,
-  english: 40,
-  mental: 80,
-  stamina: 100,
-};
 
 // --- App Component ---
 export default function App() {
