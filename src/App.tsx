@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { 
-  Book, 
-  Brain, 
-  Coffee, 
-  Cpu, 
-  GraduationCap, 
-  Heart, 
-  History, 
-  Lightbulb, 
-  Award, 
+import {
+  Book,
+  Brain,
+  Coffee,
+  Cpu,
+  GraduationCap,
+  Heart,
+  History,
+  Lightbulb,
+  Award,
   Zap,
   TrendingUp,
   AlertCircle,
@@ -23,201 +23,30 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
+// 导入模块化重构的类型定义
+import {
+  PlayerStats,
+  MajorType,
+  GameEvent,
+  Course,
+  MentorStatus,
+  Mentor,
+  InterviewQuestion,
+  CurrentInterview,
+  ResumeQuality,
+  ResumeItem,
+  GameState,
+  Action,
+  University
+} from './modules';
+
 // --- Utility ---
 function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
-// --- Types ---
-interface PlayerStats {
-  gpa: number;         // 绩点 (0-4.5)
-  research: number;    // 科研/项目 (0-100)
-  competition: number; // 竞赛 (0-100)
-  english: number;     // 英语 (0-100)
-  mental: number;      // 心态 (0-100)
-  stamina: number;     // 体力 (0-100)
-}
-
-type GamePhase = 'start' | 'gaokao' | 'university_selection' | 'university_failed' | 'course_selection' | 'main_game' | 'exam' | 'summer_camp' | 'pre_recommendation' | 'game_over';
-type MajorType = 'cs' | 'biology' | 'humanities' | 'general' | 'ee' | 'medicine' | 'law' | 'art';
-
-interface GameEvent {
-  title: string;
-  description: string;
-  options: {
-    text: string;
-    effect: (stats: PlayerStats) => { newStats: PlayerStats; log: string; moneyChange?: number };
-  }[];
-  majorRestriction?: MajorType[];
-}
-
-interface Course {
-  id: string;
-  name: string;
-  difficulty: number; // 1-5
-  credit: number;
-  type: 'compulsory' | 'elective' | 'general';
-  semester: number;
-  majorRestriction?: MajorType[];
-  mastery: number; // 掌握度 (0-100)
-  description: string;
-}
-
-interface ExamResult {
-  courseName: string;
-  score: number;
-  grade: string;
-  credit: number;
-}
-
-interface ExamReport {
-  results: ExamResult[];
-  prevGpa: number;
-  newGpa: number;
-  semesterName: string;
-}
-
-type MentorStatus = 'none' | 'contacting' | 'fish_pond' | 'verbal_offer' | 'hard_offer' | 'rejected';
-
-interface Mentor {
-  id: string;
-  name: string;
-  title: string;
-  reputation: number; // 名望 (0-100)
-  friendship: number; // 亲密度 (0-100)
-  university: string;
-  school: string;      // 学院/研究所
-  researchField: string;
-  status: MentorStatus;
-}
-
-interface Application {
-  university: string;
-  major: string;
-  status: 'pending' | 'interviewing' | 'accepted' | 'rejected' | 'waitlist';
-  phase: 'summer_camp' | 'pre_recommendation';
-}
-
-interface InterviewQuestion {
-  id: string;
-  text: string;
-  options: {
-    text: string;
-    score: number;
-    feedback: string;
-  }[];
-}
-
-interface CurrentInterview {
-  university: string;
-  major: string;
-  phase: 'summer_camp' | 'pre_recommendation';
-  questions: InterviewQuestion[];
-  currentQuestionIndex: number;
-  totalScore: number;
-  backgroundScore: number;
-}
-
-type ResumeQuality = 'common' | 'rare' | 'epic' | 'legendary';
-
-interface ResumeItem {
-  id: string;
-  type: 'research' | 'competition';
-  name: string;
-  score: number;
-  quality: ResumeQuality;
-}
-
-interface GameState {
-  phase: GamePhase;
-  semester: number;    // 当前学期 (1-6, 大一到大三)
-  week: number;        // 当前周 (1-18)
-  money: number;       // 零钱
-  logs: string[];      // 游戏日志
-  stats: PlayerStats;
-  resume: ResumeItem[]; // 个人简历
-  masteryEfficiency: number; // 掌握度提升效率倍率
-  researchEfficiency: number;  // 科研提升效率倍率
-  competitionEfficiency: number; // 竞赛提升效率倍率
-  isGameOver: boolean;
-  gameMessage: string;
-  currentEvent: GameEvent | null;
-  currentInterview: CurrentInterview | null;
-  background: string;
-  gaokaoScore: number;
-  university: string;
-  major: string;
-  majorType: MajorType;
-  failedUniversity?: string;
-  rejectionCount: number;
-  courses: Course[];
-  mentors: Mentor[];
-  potentialMentors: Mentor[];
-  social: {
-    classmates: number;
-    seniors: number;
-  };
-  applications: Application[];
-  activeExam: { type: 'midterm' | 'final' } | null;
-  showExamReport: boolean;
-  examReport: ExamReport | null;
-  selectedActions: Action[];
-  weekSummary: {
-    gains: Partial<PlayerStats> & { money?: number; classmates?: number; seniors?: number; mastery?: number };
-    logs: string[];
-  };
-  showWeeklySummary: boolean;
-  purchaseCounts: Record<string, number>;
-  endingStats?: {
-    title: string;
-    detail: string;
-    fancyQuote: string;
-    careerStats: {
-      finalGpa: number;
-      totalResumeScore: number;
-      finalEnglish: number;
-      finalSocial: number;
-      finalMoney: number;
-    };
-    applicationStats: {
-      summerCamp: {
-        applied: number;
-        interviews: number;
-        offers: number;
-      };
-      preRec: {
-        applied: number;
-        interviews: number;
-        offers: number;
-      };
-    };
-  };
-}
-
-interface Action {
-  name: string;
-  description: string;
-  icon: React.ReactNode;
-  cost: Partial<PlayerStats> & { money?: number };
-  gain: Partial<PlayerStats> & { mastery?: number; money?: number };
-  socialGain?: {
-    classmates?: number;
-    seniors?: number;
-  };
-  chance?: number;
-}
-
 // --- Constants ---
 const SEMESTER_NAMES = ["大一上", "大一下", "大二上", "大二下", "大三上", "大三下", "大四上", "大四下"];
-
-interface University {
-  name: string;
-  minScore: number;
-  tier: string;
-  tags: string[];
-  description: string;
-  baoyanRate: number; // 保研率百分比
-}
 
 const UNIVERSITIES: University[] = [
   // T0 - 顶尖学府
