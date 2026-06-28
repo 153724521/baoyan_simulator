@@ -23,7 +23,7 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// 导入模块化重构的类型定义
+// 导入模块化重构的类型定义和保存功能
 import {
   PlayerStats,
   MajorType,
@@ -37,7 +37,13 @@ import {
   ResumeItem,
   GameState,
   Action,
-  University
+  University,
+  // 保存/加载功能
+  saveGameState,
+  loadGameState,
+  hasSavedGame,
+  deleteSavedGame,
+  getSaveInfo
 } from './modules';
 
 // --- Utility ---
@@ -746,6 +752,7 @@ const INITIAL_STATS: PlayerStats = {
 // --- App Component ---
 export default function App() {
   const [activeTab, setActiveTab] = useState<'actions' | 'shop' | 'mentors' | 'academic' | 'social' | 'resume'>('actions');
+  const [showSavePrompt, setShowSavePrompt] = useState(false); // 是否显示存档提示
   const [state, setState] = useState<GameState>({
     phase: 'start',
     semester: 0,
@@ -780,6 +787,43 @@ export default function App() {
     showWeeklySummary: false,
     purchaseCounts: {},
   });
+
+  // 检查存档（游戏启动时）
+  useEffect(() => {
+    if (hasSavedGame()) {
+      const saveInfo = getSaveInfo();
+      if (saveInfo.exists && saveInfo.phase && saveInfo.phase !== 'start') {
+        setShowSavePrompt(true);
+      }
+    }
+  }, []);
+
+  // 自动保存（游戏状态更新时）
+  useEffect(() => {
+    if (state.phase !== 'start' && !state.isGameOver) {
+      saveGameState(state);
+    }
+  }, [state]);
+
+  // 加载存档
+  const loadSavedGame = () => {
+    const savedState = loadGameState();
+    if (savedState) {
+      setState(savedState);
+      setShowSavePrompt(false);
+    }
+  };
+
+  // 开始新游戏（删除旧存档）
+  const startNewGame = () => {
+    deleteSavedGame();
+    setShowSavePrompt(false);
+    setState(prev => ({
+      ...prev,
+      phase: 'start',
+      logs: ["欢迎来到保研模拟器。你的旅程将从高考分数公布的那一刻开始。"]
+    }));
+  };
 
   const BACKGROUNDS = [
     {
@@ -3227,7 +3271,46 @@ export default function App() {
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
-      {state.phase === 'start' && (
+      {/* 存档提示对话框 */}
+      {showSavePrompt && (
+        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-in fade-in duration-300">
+          <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="p-4 bg-blue-900/30 rounded-full">
+                  <History className="w-16 h-16 text-blue-500" />
+                </div>
+              </div>
+              <h2 className="text-3xl font-bold text-blue-400">发现存档</h2>
+              <p className="text-slate-300 leading-relaxed">
+                检测到您有未完成的游戏进度，是否继续之前的游戏？
+              </p>
+              <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
+                <p className="text-sm text-slate-400">存档信息：</p>
+                <p className="text-sm text-blue-400 mt-2">
+                  当前阶段：{getSaveInfo().phase || '未知'}
+                </p>
+              </div>
+              <div className="flex gap-4 justify-center">
+                <button
+                  onClick={loadSavedGame}
+                  className="px-6 py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition-all"
+                >
+                  继续游戏
+                </button>
+                <button
+                  onClick={startNewGame}
+                  className="px-6 py-3 bg-slate-700 text-white rounded-full font-bold hover:bg-slate-600 transition-all"
+                >
+                  新游戏
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {state.phase === 'start' && !showSavePrompt && (
         <div className="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-700">
           <div className="space-y-4 mb-8">
             <h1 className="text-5xl font-extrabold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">
