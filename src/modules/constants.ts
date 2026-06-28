@@ -3,7 +3,7 @@
  * 从 App.tsx 中提取的所有常量数据
  */
 
-import { University, Course, GameEvent, InterviewQuestion, Mentor, MajorType, PlayerStats } from './types';
+import { University, Course, InterviewQuestion, Mentor, MajorType, PlayerStats } from './types';
 
 // 学期名称
 export const SEMESTER_NAMES = ["大一上", "大一下", "大二上", "大二下", "大三上", "大三下", "大四上", "大四下"];
