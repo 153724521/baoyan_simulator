@@ -23,7 +23,7 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// 导入模块化的常量和函数
+// 导入模块化的常量和函数（阶段4进行中，大型数据逐步迁移）
 import {
   SEMESTER_NAMES,
   MAJORS,
