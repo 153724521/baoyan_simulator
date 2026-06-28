@@ -1,14 +1,14 @@
 import React, { useState, useEffect, useRef } from 'react';
-import {
-  Book,
-  Brain,
-  Coffee,
-  Cpu,
-  GraduationCap,
-  Heart,
-  History,
-  Lightbulb,
-  Award,
+import { 
+  Book, 
+  Brain, 
+  Coffee, 
+  Cpu, 
+  GraduationCap, 
+  Heart, 
+  History, 
+  Lightbulb, 
+  Award, 
   Zap,
   TrendingUp,
   AlertCircle,
@@ -23,27 +23,9 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// 导入模块化重构的类型定义和保存功能
+// 导入模块化的常量（暂时只导入已成功迁移的SEMESTER_NAMES）
 import {
-  PlayerStats,
-  MajorType,
-  GameEvent,
-  Course,
-  MentorStatus,
-  Mentor,
-  InterviewQuestion,
-  CurrentInterview,
-  ResumeQuality,
-  ResumeItem,
-  GameState,
-  Action,
-  University,
-  // 保存/加载功能
-  saveGameState,
-  loadGameState,
-  hasSavedGame,
-  deleteSavedGame,
-  getSaveInfo
+  SEMESTER_NAMES
 } from './modules';
 
 // --- Utility ---
@@ -51,8 +33,194 @@ function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+// --- Types ---
+interface PlayerStats {
+  gpa: number;         // 绩点 (0-4.5)
+  research: number;    // 科研/项目 (0-100)
+  competition: number; // 竞赛 (0-100)
+  english: number;     // 英语 (0-100)
+  mental: number;      // 心态 (0-100)
+  stamina: number;     // 体力 (0-100)
+}
+
+type GamePhase = 'start' | 'gaokao' | 'university_selection' | 'university_failed' | 'course_selection' | 'main_game' | 'exam' | 'summer_camp' | 'pre_recommendation' | 'game_over';
+type MajorType = 'cs' | 'biology' | 'humanities' | 'general' | 'ee' | 'medicine' | 'law' | 'art';
+
+interface GameEvent {
+  title: string;
+  description: string;
+  options: {
+    text: string;
+    effect: (stats: PlayerStats) => { newStats: PlayerStats; log: string; moneyChange?: number };
+  }[];
+  majorRestriction?: MajorType[];
+}
+
+interface Course {
+  id: string;
+  name: string;
+  difficulty: number; // 1-5
+  credit: number;
+  type: 'compulsory' | 'elective' | 'general';
+  semester: number;
+  majorRestriction?: MajorType[];
+  mastery: number; // 掌握度 (0-100)
+  description: string;
+}
+
+interface ExamResult {
+  courseName: string;
+  score: number;
+  grade: string;
+  credit: number;
+}
+
+interface ExamReport {
+  results: ExamResult[];
+  prevGpa: number;
+  newGpa: number;
+  semesterName: string;
+}
+
+type MentorStatus = 'none' | 'contacting' | 'fish_pond' | 'verbal_offer' | 'hard_offer' | 'rejected';
+
+interface Mentor {
+  id: string;
+  name: string;
+  title: string;
+  reputation: number; // 名望 (0-100)
+  friendship: number; // 亲密度 (0-100)
+  university: string;
+  school: string;      // 学院/研究所
+  researchField: string;
+  status: MentorStatus;
+}
+
+interface Application {
+  university: string;
+  major: string;
+  status: 'pending' | 'interviewing' | 'accepted' | 'rejected' | 'waitlist';
+  phase: 'summer_camp' | 'pre_recommendation';
+}
+
+interface InterviewQuestion {
+  id: string;
+  text: string;
+  options: {
+    text: string;
+    score: number;
+    feedback: string;
+  }[];
+}
+
+interface CurrentInterview {
+  university: string;
+  major: string;
+  phase: 'summer_camp' | 'pre_recommendation';
+  questions: InterviewQuestion[];
+  currentQuestionIndex: number;
+  totalScore: number;
+  backgroundScore: number;
+}
+
+type ResumeQuality = 'common' | 'rare' | 'epic' | 'legendary';
+
+interface ResumeItem {
+  id: string;
+  type: 'research' | 'competition';
+  name: string;
+  score: number;
+  quality: ResumeQuality;
+}
+
+interface GameState {
+  phase: GamePhase;
+  semester: number;    // 当前学期 (1-6, 大一到大三)
+  week: number;        // 当前周 (1-18)
+  money: number;       // 零钱
+  logs: string[];      // 游戏日志
+  stats: PlayerStats;
+  resume: ResumeItem[]; // 个人简历
+  masteryEfficiency: number; // 掌握度提升效率倍率
+  researchEfficiency: number;  // 科研提升效率倍率
+  competitionEfficiency: number; // 竞赛提升效率倍率
+  isGameOver: boolean;
+  gameMessage: string;
+  currentEvent: GameEvent | null;
+  currentInterview: CurrentInterview | null;
+  background: string;
+  gaokaoScore: number;
+  university: string;
+  major: string;
+  majorType: MajorType;
+  failedUniversity?: string;
+  rejectionCount: number;
+  courses: Course[];
+  mentors: Mentor[];
+  potentialMentors: Mentor[];
+  social: {
+    classmates: number;
+    seniors: number;
+  };
+  applications: Application[];
+  activeExam: { type: 'midterm' | 'final' } | null;
+  showExamReport: boolean;
+  examReport: ExamReport | null;
+  selectedActions: Action[];
+  weekSummary: {
+    gains: Partial<PlayerStats> & { money?: number; classmates?: number; seniors?: number; mastery?: number };
+    logs: string[];
+  };
+  showWeeklySummary: boolean;
+  purchaseCounts: Record<string, number>;
+  endingStats?: {
+    title: string;
+    detail: string;
+    fancyQuote: string;
+    careerStats: {
+      finalGpa: number;
+      totalResumeScore: number;
+      finalEnglish: number;
+      finalSocial: number;
+      finalMoney: number;
+    };
+    applicationStats: {
+      summerCamp: {
+        applied: number;
+        interviews: number;
+        offers: number;
+      };
+      preRec: {
+        applied: number;
+        interviews: number;
+        offers: number;
+      };
+    };
+  };
+}
+
+interface Action {
+  name: string;
+  description: string;
+  icon: React.ReactNode;
+  cost: Partial<PlayerStats> & { money?: number };
+  gain: Partial<PlayerStats> & { mastery?: number; money?: number };
+  socialGain?: {
+    classmates?: number;
+    seniors?: number;
+  };
+  chance?: number;
+}
+
 // --- Constants ---
-const SEMESTER_NAMES = ["大一上", "大一下", "大二上", "大二下", "大三上", "大三下", "大四上", "大四下"];
+interface University {
+  name: string;
+  minScore: number;
+  tier: string;
+  tags: string[];
+  description: string;
+  baoyanRate: number; // 保研率百分比
+}
 
 const UNIVERSITIES: University[] = [
   // T0 - 顶尖学府
@@ -752,7 +920,6 @@ const INITIAL_STATS: PlayerStats = {
 // --- App Component ---
 export default function App() {
   const [activeTab, setActiveTab] = useState<'actions' | 'shop' | 'mentors' | 'academic' | 'social' | 'resume'>('actions');
-  const [showSavePrompt, setShowSavePrompt] = useState(false); // 是否显示存档提示
   const [state, setState] = useState<GameState>({
     phase: 'start',
     semester: 0,
@@ -787,43 +954,6 @@ export default function App() {
     showWeeklySummary: false,
     purchaseCounts: {},
   });
-
-  // 检查存档（游戏启动时）
-  useEffect(() => {
-    if (hasSavedGame()) {
-      const saveInfo = getSaveInfo();
-      if (saveInfo.exists && saveInfo.phase && saveInfo.phase !== 'start') {
-        setShowSavePrompt(true);
-      }
-    }
-  }, []);
-
-  // 自动保存（游戏状态更新时）
-  useEffect(() => {
-    if (state.phase !== 'start' && !state.isGameOver) {
-      saveGameState(state);
-    }
-  }, [state]);
-
-  // 加载存档
-  const loadSavedGame = () => {
-    const savedState = loadGameState();
-    if (savedState) {
-      setState(savedState);
-      setShowSavePrompt(false);
-    }
-  };
-
-  // 开始新游戏（删除旧存档）
-  const startNewGame = () => {
-    deleteSavedGame();
-    setShowSavePrompt(false);
-    setState(prev => ({
-      ...prev,
-      phase: 'start',
-      logs: ["欢迎来到保研模拟器。你的旅程将从高考分数公布的那一刻开始。"]
-    }));
-  };
 
   const BACKGROUNDS = [
     {
@@ -3271,46 +3401,7 @@ export default function App() {
 
   return (
     <div className="min-h-screen p-4 md:p-8 flex flex-col items-center">
-      {/* 存档提示对话框 */}
-      {showSavePrompt && (
-        <div className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 animate-in fade-in duration-300">
-          <div className="max-w-md w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl">
-            <div className="text-center space-y-6">
-              <div className="flex justify-center">
-                <div className="p-4 bg-blue-900/30 rounded-full">
-                  <History className="w-16 h-16 text-blue-500" />
-                </div>
-              </div>
-              <h2 className="text-3xl font-bold text-blue-400">发现存档</h2>
-              <p className="text-slate-300 leading-relaxed">
-                检测到您有未完成的游戏进度，是否继续之前的游戏？
-              </p>
-              <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                <p className="text-sm text-slate-400">存档信息：</p>
-                <p className="text-sm text-blue-400 mt-2">
-                  当前阶段：{getSaveInfo().phase || '未知'}
-                </p>
-              </div>
-              <div className="flex gap-4 justify-center">
-                <button
-                  onClick={loadSavedGame}
-                  className="px-6 py-3 bg-blue-600 text-white rounded-full font-bold hover:bg-blue-700 transition-all"
-                >
-                  继续游戏
-                </button>
-                <button
-                  onClick={startNewGame}
-                  className="px-6 py-3 bg-slate-700 text-white rounded-full font-bold hover:bg-slate-600 transition-all"
-                >
-                  新游戏
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {state.phase === 'start' && !showSavePrompt && (
+      {state.phase === 'start' && (
         <div className="max-w-2xl w-full bg-slate-900 border border-slate-800 rounded-2xl p-8 shadow-2xl animate-in fade-in zoom-in-95 duration-700">
           <div className="space-y-4 mb-8">
             <h1 className="text-5xl font-extrabold tracking-tight text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-400 to-purple-500">

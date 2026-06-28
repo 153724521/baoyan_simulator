@@ -1,16 +1,15 @@
 /**
  * 保研模拟器 - 类型定义模块
- * 从 App.tsx 中提取的所有类型定义
  */
 
 // 玩家属性
 export interface PlayerStats {
-  gpa: number;         // 绩点 (0-4.5)
-  research: number;    // 科研/项目 (0-100)
-  competition: number; // 竞赛 (0-100)
-  english: number;     // 英语 (0-100)
-  mental: number;      // 心态 (0-100)
-  stamina: number;     // 体力 (0-100)
+  gpa: number;
+  research: number;
+  competition: number;
+  english: number;
+  mental: number;
+  stamina: number;
 }
 
 // 游戏阶段
@@ -19,44 +18,17 @@ export type GamePhase = 'start' | 'gaokao' | 'university_selection' | 'universit
 // 专业类型
 export type MajorType = 'cs' | 'biology' | 'humanities' | 'general' | 'ee' | 'medicine' | 'law' | 'art';
 
-// 游戏事件
-export interface GameEvent {
-  title: string;
-  description: string;
-  options: {
-    text: string;
-    effect: (stats: PlayerStats) => { newStats: PlayerStats; log: string; moneyChange?: number };
-  }[];
-  majorRestriction?: MajorType[];
-}
-
 // 课程
 export interface Course {
   id: string;
   name: string;
-  difficulty: number; // 1-5
+  difficulty: number;
   credit: number;
   type: 'compulsory' | 'elective' | 'general';
   semester: number;
   majorRestriction?: MajorType[];
-  mastery: number; // 掌握度 (0-100)
+  mastery: number;
   description: string;
-}
-
-// 考试结果
-export interface ExamResult {
-  courseName: string;
-  score: number;
-  grade: string;
-  credit: number;
-}
-
-// 考试报告
-export interface ExamReport {
-  results: ExamResult[];
-  prevGpa: number;
-  newGpa: number;
-  semesterName: string;
 }
 
 // 导师状态
@@ -67,42 +39,33 @@ export interface Mentor {
   id: string;
   name: string;
   title: string;
-  reputation: number; // 名望 (0-100)
-  friendship: number; // 亲密度 (0-100)
+  reputation: number;
+  friendship: number;
   university: string;
-  school: string;      // 学院/研究所
+  school: string;
   researchField: string;
   status: MentorStatus;
-}
-
-// 申请
-export interface Application {
-  university: string;
-  major: string;
-  status: 'pending' | 'interviewing' | 'accepted' | 'rejected' | 'waitlist';
-  phase: 'summer_camp' | 'pre_recommendation';
 }
 
 // 面试问题
 export interface InterviewQuestion {
   id: string;
   text: string;
-  options: {
+  options: Array<{
     text: string;
     score: number;
     feedback: string;
-  }[];
+  }>;
 }
 
-// 当前面试
-export interface CurrentInterview {
-  university: string;
-  major: string;
-  phase: 'summer_camp' | 'pre_recommendation';
-  questions: InterviewQuestion[];
-  currentQuestionIndex: number;
-  totalScore: number;
-  backgroundScore: number;
+// 大学
+export interface University {
+  name: string;
+  minScore: number;
+  tier: string;
+  tags: string[];
+  description: string;
+  baoyanRate: number;
 }
 
 // 简历质量
@@ -117,18 +80,29 @@ export interface ResumeItem {
   quality: ResumeQuality;
 }
 
+// 游戏事件
+export interface GameEvent {
+  title: string;
+  description: string;
+  options: Array<{
+    text: string;
+    effect: (stats: PlayerStats) => { newStats: PlayerStats; log: string; moneyChange?: number };
+  }>;
+  majorRestriction?: MajorType[];
+}
+
 // 游戏状态
 export interface GameState {
   phase: GamePhase;
-  semester: number;    // 当前学期 (1-6, 大一到大三)
-  week: number;        // 当前周 (1-18)
-  money: number;       // 零钱
-  logs: string[];      // 游戏日志
+  semester: number;
+  week: number;
+  money: number;
+  logs: string[];
   stats: PlayerStats;
-  resume: ResumeItem[]; // 个人简历
-  masteryEfficiency: number; // 掌握度提升效率倍率
-  researchEfficiency: number;  // 科研提升效率倍率
-  competitionEfficiency: number; // 竞赛提升效率倍率
+  resume: ResumeItem[];
+  masteryEfficiency: number;
+  researchEfficiency: number;
+  competitionEfficiency: number;
   isGameOver: boolean;
   gameMessage: string;
   currentEvent: GameEvent | null;
@@ -184,6 +158,17 @@ export interface GameState {
   };
 }
 
+// 当前面试
+export interface CurrentInterview {
+  university: string;
+  major: string;
+  phase: 'summer_camp' | 'pre_recommendation';
+  questions: InterviewQuestion[];
+  currentQuestionIndex: number;
+  totalScore: number;
+  backgroundScore: number;
+}
+
 // 行动
 export interface Action {
   name: string;
@@ -198,29 +183,26 @@ export interface Action {
   chance?: number;
 }
 
-// 大学
-export interface University {
-  name: string;
-  minScore: number;
-  tier: string;
-  tags: string[];
-  description: string;
-  baoyanRate: number; // 保研率百分比
+// 申请
+export interface Application {
+  university: string;
+  major: string;
+  status: 'pending' | 'interviewing' | 'accepted' | 'rejected' | 'waitlist';
+  phase: 'summer_camp' | 'pre_recommendation';
 }
 
-// 专业
-export interface Major {
-  name: string;
-  type: MajorType;
-  description: string;
-  bonus: string;
+// 考试结果
+export interface ExamResult {
+  courseName: string;
+  score: number;
+  grade: string;
+  credit: number;
 }
 
-// 背景
-export interface Background {
-  name: string;
-  description: string;
-  stats: PlayerStats;
-  masteryEfficiency: number;
-  money?: number;
+// 考试报告
+export interface ExamReport {
+  results: ExamResult[];
+  prevGpa: number;
+  newGpa: number;
+  semesterName: string;
 }
