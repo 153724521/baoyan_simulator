@@ -23,11 +23,13 @@ import {
 import { clsx, type ClassValue } from 'clsx';
 import { twMerge } from 'tailwind-merge';
 
-// 导入模块化的常量和函数（阶段4进行中）
+// 导入模块化的常量和函数
 import {
   SEMESTER_NAMES,
+  MAJORS,
   INITIAL_STATS,
   INITIAL_MENTORS,
+  INTERVIEW_QUESTIONS,
   generateNewMentorBatch
 } from './modules';
 
@@ -373,54 +375,6 @@ const UNIVERSITIES: University[] = [
   { name: "北京林业大学", minScore: 615, tier: "T5", tags: ["211", "园林"], baoyanRate: 15, description: "园林建筑全国第一。" },
   { name: "福建农林大学", minScore: 555, tier: "T5", tags: ["农业", "特色"], baoyanRate: 5, description: "海峡两岸农林合作名校。" },
   { name: "山东农业大学", minScore: 545, tier: "T5", tags: ["农业", "老牌"], baoyanRate: 6, description: "底蕴深厚的农林名校。" },
-];
-
-const INTERVIEW_QUESTIONS: InterviewQuestion[] = [
-  {
-    id: 'intro',
-    text: '请做一个简短的自我介绍。',
-    options: [
-      { text: '（从容大方）介绍自己的学业成绩、科研经历及对贵校的向往。', score: 20, feedback: '面试官微微点头，对你的综合素质留下了良好印象。' },
-      { text: '（略显紧张）重点强调自己的GPA和排名。', score: 15, feedback: '面试官认为你是一个扎实的学生，但缺乏一些亮点。' },
-      { text: '（过于冗长）事无巨细地讲述自己的成长经历。', score: 10, feedback: '面试官看了一下表，示意你抓重点。' }
-    ]
-  },
-  {
-    id: 'research',
-    text: '谈谈你在本科期间参与最深入的一个科研项目，你承担了什么角色？',
-    options: [
-      { text: '详细描述技术路线、解决的问题及自己的贡献，展现独立思考能力。', score: 25, feedback: '面试官对你的科研潜力表示认可。' },
-      { text: '简要介绍项目，强调获奖情况。', score: 18, feedback: '面试官更希望听到你的具体工作细节。' },
-      { text: '承认自己只是参与，对具体核心细节了解不深。', score: 8, feedback: '面试官皱了皱眉，对你的参与度表示怀疑。' }
-    ]
-  },
-  {
-    id: 'professional',
-    text: '如果你被录取，你打算如何规划你的研究生生涯？',
-    options: [
-      { text: '提出明确的研究方向，并表达了对某位导师课题组的强烈兴趣。', score: 20, feedback: '面试官认为你目标明确，匹配度高。' },
-      { text: '表示会努力学习，按时毕业。', score: 12, feedback: '回答比较中规中矩，缺乏吸引力。' },
-      { text: '还没想好，走一步看一步。', score: 5, feedback: '面试官对你的学术热情产生怀疑。' }
-    ]
-  },
-  {
-    id: 'challenge',
-    text: '如果你在研究中遇到长期无法解决的困难，你会怎么办？',
-    options: [
-      { text: '分析原因，查阅文献，并积极与导师、学长讨论寻求突破。', score: 20, feedback: '展现了良好的抗压能力和解决问题的素质。' },
-      { text: '自己死磕，相信勤能补拙。', score: 15, feedback: '精神可嘉，但可能效率不高。' },
-      { text: '可能会考虑换个简单的课题。', score: 5, feedback: '学术韧性似乎有待加强。' }
-    ]
-  },
-  {
-    id: 'why_us',
-    text: '你同时申请了多所学校，如果都录取的你，你会怎么选？',
-    options: [
-      { text: '表达对该校独特学术氛围和学科优势的极高认可，将其列为首选。', score: 15, feedback: '面试官感受到了你的诚意。' },
-      { text: '如实告知还在权衡中。', score: 10, feedback: '诚实但可能让对方觉得你不够坚定。' },
-      { text: '支支吾吾，没有明确态度。', score: 5, feedback: '面试官对你的意向度表示担忧。' }
-    ]
-  }
 ];
 
 const ALL_COURSES: Course[] = [
@@ -772,81 +726,6 @@ const RESUME_DATA_POOL: {
     { name: "获得“中国大学生年度人物”称号", quality: 'legendary', scoreRange: [60, 75] },
   ]
 };
-
-const MAJORS: { name: string; type: MajorType; description: string; bonus: string }[] = [
-  {
-    name: "计算机科学与技术", 
-    type: "cs", 
-    description: "卷王聚集地。竞赛和实习是重头戏，GPA压力极大。",
-    bonus: "竞赛收益+25%，科研收益+10%" 
-  },
-  { 
-    name: "人工智能", 
-    type: "cs", 
-    description: "时代的浪尖。数学要求极高，大模型和算法是核心。",
-    bonus: "科研收益+20%，数学基础需求高" 
-  },
-  { 
-    name: "生物科学", 
-    type: "biology", 
-    description: "实验室搬砖人。需要大量的科研投入和实验成果，英语要求高。",
-    bonus: "科研收益+35%，英语需求高" 
-  },
-  { 
-    name: "汉语言文学", 
-    type: "humanities", 
-    description: "人文气息浓厚。注重阅读积累和论文发表，社交属性强。",
-    bonus: "GPA收益+20%，心态恢复快" 
-  },
-  { 
-    name: "历史学", 
-    type: "humanities", 
-    description: "板凳甘坐十年冷。需要极强的文献阅读能力和逻辑推理。",
-    bonus: "科研收益+20%，心态稳健" 
-  },
-  { 
-    name: "金融学", 
-    type: "general", 
-    description: "精英主义。注重综合素质、英语和实习，对绩点要求苛刻。",
-    bonus: "英语收益+20%，初始金钱+2000" 
-  },
-  { 
-    name: "会计学", 
-    type: "general", 
-    description: "精打细算。考证狂人的首选，就业范围极广。",
-    bonus: "GPA收益+15%，初始金钱+1000" 
-  },
-  { 
-    name: "电子信息工程", 
-    type: "ee", 
-    description: "硬核工科。电路、信号、芯片，动手能力和数学基础缺一不可。",
-    bonus: "竞赛收益+20%，体力消耗+10%" 
-  },
-  { 
-    name: "临床医学", 
-    type: "medicine", 
-    description: "劝人学医... 课业极其繁重，需要极强的记忆力和体力。",
-    bonus: "GPA收益+15%，体力需求极大" 
-  },
-  { 
-    name: "法学", 
-    type: "law", 
-    description: "背诵之王。法律条文和案例分析，逻辑思维 and 表达能力是关键。",
-    bonus: "英语收益+15%，心态抗压+15%" 
-  },
-  { 
-    name: "视觉传达设计", 
-    type: "art", 
-    description: "熬夜画图。作品集是核心，需要审美天赋 and 软件熟练度。",
-    bonus: "科研收益(作品集)+25%，经常熬夜" 
-  },
-  { 
-    name: "数学与应用数学", 
-    type: "general", 
-    description: "一切科学的基础。抽象思维的极致，转保CS/金融的黄金跳板。",
-    bonus: "GPA收益+25%，心态消耗大" 
-  },
-];
 
 // --- App Component ---
 export default function App() {
